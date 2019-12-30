@@ -1,11 +1,19 @@
 import React, { useState } from 'react';
 import { Card, Colors, Button, InputGroup, Divider, H1 } from "@blueprintjs/core"
-import {Grid} from "./Components/graph_renderer"
+import { Grid } from "./Components/graph_renderer"
 import GridRenderer from "./Components/graph_renderer"
-import rooms from "./data/rooms.js"
-import temp from "./data/temp.json"
 
+import axios from "axios"
+
+axios.defaults.headers.common = {
+  "Content-Type": "application/json"
+}
 function App() {
+
+  const [loading, setLoading] = useState(true);
+
+
+
 
   const [state, setState] = useState({
     width: 10,
@@ -58,9 +66,39 @@ function App() {
   const grid = new Grid({
     currentRotation: currentRotation,
     currentProp: currentProp,
-    width: state.width, 
+    width: state.width,
     height: state.height
   });
+
+  if (loading) {
+    axios.get("http://127.0.0.1:3001/load", {
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+      },
+    }).then((res) => {
+      console.log(res)
+      setLoading(false)
+
+      updateLoadedRooms(res.data)
+    })
+
+    return <div />
+  }
+  const save = (event) => {
+    event.preventDefault();
+    axios.post("http://127.0.0.1:3001/save", {
+      rooms : loadedRooms
+    }).then((res) => {
+      console.log(res)
+    })
+  }
+
+  
+
+
+
+
+
 
   const changeRoomSize = (event) => {
     event.preventDefault();
@@ -68,17 +106,9 @@ function App() {
     setState({
       width: formData.get("width"),
       height: formData.get("height"),
-      grid : state.grid
+      grid: state.grid
     })
   }
-
-  const save = () => {
-    //console.log(grid.exportGrid())
-    //fs.writeFile('myjsonfile.json', json, 'utf8', callback);
-  }
-
-  console.log((temp))
-
 
 
   return (
@@ -91,7 +121,7 @@ function App() {
           }}
         >
 
-          <GridRenderer grid={grid}  />
+          <GridRenderer grid={grid} />
 
 
         </Card>
@@ -132,20 +162,22 @@ function App() {
 
           <Button icon="eraser" text="Reset" />
 
-          <Button onClick={save} icon="floppy" text="Save" />
+          <Button onClick = {save}icon="floppy" text="Save" />
         </Card>
-     
+
         <Card style={{ marginLeft: "50px", width: "200px", backgroundColor: Colors.LIGHT_GRAY5 }}>
           {
-            rooms.map((object) => {
+            loadedRooms.map((room) => {
               return <Card>
-                  <H1>temp</H1>
-                </Card>
+                {
+                  room.x
+                }
+              </Card>
             })
           }
 
         </Card>
-     
+
       </div>
 
       <Card style={{ marginTop: "20px" }}>
