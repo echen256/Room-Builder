@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
-import { Card, Colors, Button, InputGroup, Divider } from "@blueprintjs/core"
-import Grid from "./Components/graph"
+import { Card, Colors, Button, InputGroup, Divider, H1 } from "@blueprintjs/core"
+import {Grid} from "./Components/graph_renderer"
+import GridRenderer from "./Components/graph_renderer"
+import rooms from "./data/rooms.js"
+import temp from "./data/temp.json"
 
 function App() {
 
@@ -35,8 +38,8 @@ function App() {
       color: Colors.GREEN1
     },
     {
-      width: 2,
-      height: 2,
+      width: 1,
+      height: 1,
       name: "End Table",
       color: Colors.GOLD1
     },
@@ -49,17 +52,32 @@ function App() {
   ]
 
   const [currentProp, setCurrentProp] = useState(furniture[0])
-
   const [currentRotation, setCurrentRotation] = useState(0)
+
+  const [loadedRooms, updateLoadedRooms] = useState([])
+  const grid = new Grid({
+    currentRotation: currentRotation,
+    currentProp: currentProp,
+    width: state.width, 
+    height: state.height
+  });
 
   const changeRoomSize = (event) => {
     event.preventDefault();
     var formData = new FormData(event.currentTarget);
     setState({
       width: formData.get("width"),
-      height: formData.get("height")
+      height: formData.get("height"),
+      grid : state.grid
     })
   }
+
+  const save = () => {
+    //console.log(grid.exportGrid())
+    //fs.writeFile('myjsonfile.json', json, 'utf8', callback);
+  }
+
+  console.log((temp))
 
 
 
@@ -73,7 +91,7 @@ function App() {
           }}
         >
 
-          <Grid key = {state.width + ":" + state.height} currentRotation={currentRotation} currentProp={currentProp} width={state.width} height={state.height} />
+          <GridRenderer grid={grid}  />
 
 
         </Card>
@@ -112,8 +130,22 @@ function App() {
 
           <Divider />
 
-          <Button icon = "eraser" text = "Reset"/>
+          <Button icon="eraser" text="Reset" />
+
+          <Button onClick={save} icon="floppy" text="Save" />
         </Card>
+     
+        <Card style={{ marginLeft: "50px", width: "200px", backgroundColor: Colors.LIGHT_GRAY5 }}>
+          {
+            rooms.map((object) => {
+              return <Card>
+                  <H1>temp</H1>
+                </Card>
+            })
+          }
+
+        </Card>
+     
       </div>
 
       <Card style={{ marginTop: "20px" }}>
