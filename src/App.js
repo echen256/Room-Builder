@@ -8,67 +8,74 @@ import axios from "axios"
 axios.defaults.headers.common = {
   "Content-Type": "application/json"
 }
+
+var furniture = [
+  {
+    width: 2,
+    height: 2,
+    name: "Bed",
+    color: Colors.BLUE1
+  },
+  {
+    width: 1,
+    height: 1,
+    name: "Wardrobe",
+    color: Colors.INDIGO1
+  },
+  {
+    width: 2,
+    height: 1,
+    name: "Desk",
+    color: Colors.RED1
+  },
+  {
+    width: 1,
+    height: 1,
+    name: "Drawer Cabinet",
+    color: Colors.GREEN1
+  },
+  {
+    width: 1,
+    height: 1,
+    name: "End Table",
+    color: Colors.GOLD1
+  },
+  {
+    width: 1,
+    height: 1,
+    name: "Erase",
+    color: Colors.LIGHT_GRAY5
+  }
+]
+
 function App() {
 
   const [loading, setLoading] = useState(true);
 
-
-
-
+  const [loadedRooms, updateLoadedRooms] = useState([])
   const [state, setState] = useState({
-    width: 10,
-    height: 10
+    grid: new Grid({
+      width: 10,
+      height: 10,
+      currentProp: furniture[0],
+      currentRotation: 0
+    })
   })
 
-  var furniture = [
-    {
-      width: 2,
-      height: 2,
-      name: "Bed",
-      color: Colors.BLUE1
-    },
-    {
-      width: 1,
-      height: 1,
-      name: "Wardrobe",
-      color: Colors.INDIGO1
-    },
-    {
-      width: 2,
-      height: 1,
-      name: "Desk",
-      color: Colors.RED1
-    },
-    {
-      width: 1,
-      height: 1,
-      name: "Drawer Cabinet",
-      color: Colors.GREEN1
-    },
-    {
-      width: 1,
-      height: 1,
-      name: "End Table",
-      color: Colors.GOLD1
-    },
-    {
-      width: 1,
-      height: 1,
-      name: "Erase",
-      color: Colors.LIGHT_GRAY5
-    }
-  ]
+  const setCurrentProp = (prop) => {
+    var grid = state.grid;
+    grid.currentProp = prop;
+    setState({ ...state, grid: grid })
+  }
 
-  const [currentProp, setCurrentProp] = useState(furniture[0])
-  const [currentRotation, setCurrentRotation] = useState(0)
+  const setCurrentRotation = (rotation) => {
+    var grid = state.grid;
+    grid.currentRotation = rotation * Math.PI / 180;
+    setState({ ...state, currentRotation: rotation, grid: grid })
+  }
 
-  const [loadedRooms, updateLoadedRooms] = useState([])
-  const grid = new Grid({
-    currentRotation: currentRotation,
-    currentProp: currentProp,
-    width: state.width,
-    height: state.height
-  });
+
+
 
   if (loading) {
     axios.get("http://127.0.0.1:3001/load", {
@@ -87,26 +94,28 @@ function App() {
   const save = (event) => {
     event.preventDefault();
     axios.post("http://127.0.0.1:3001/save", {
-      rooms : loadedRooms
+      rooms: loadedRooms
     }).then((res) => {
       console.log(res)
     })
   }
 
-  
-
-
-
-
-
+  const add = (event) => {
+    event.preventDefault();
+    loadedRooms.push(state.grid.exportGrid())
+    updateLoadedRooms([...loadedRooms])
+  }
 
   const changeRoomSize = (event) => {
     event.preventDefault();
     var formData = new FormData(event.currentTarget);
     setState({
-      width: formData.get("width"),
-      height: formData.get("height"),
-      grid: state.grid
+      grid: new Grid({
+        width: formData.get("width"),
+        height: formData.get("height"),
+        currentProp: state.grid.currentProp,
+        currentRotation: state.grid.currentRotation
+      })
     })
   }
 
@@ -121,7 +130,7 @@ function App() {
           }}
         >
 
-          <GridRenderer grid={grid} />
+          <GridRenderer grid={state.grid} />
 
 
         </Card>
@@ -129,8 +138,8 @@ function App() {
         <Card style={{ marginLeft: "50px", width: "200px", backgroundColor: Colors.LIGHT_GRAY5 }}>
           <form onSubmit={changeRoomSize} >
 
-            <InputGroup name="width" placeholder="Room Width" defaultValue={state.width}></InputGroup>
-            <InputGroup name="height" placeholder="Room Height" defaultValue={state.height}></InputGroup>
+            <InputGroup name="width" placeholder="Room Width" defaultValue={state.grid.width}></InputGroup>
+            <InputGroup name="height" placeholder="Room Height" defaultValue={state.grid.height}></InputGroup>
             <InputGroup type="submit" />
           </form>
 
@@ -141,7 +150,7 @@ function App() {
               furniture.map((item) => {
                 return <Card
                   className={
-                    currentProp.name === item.name ? "bp3-dark" : ""
+                    state.grid.currentProp.name === item.name ? "bp3-dark" : ""
                   }
                   onClick={() =>
                     setCurrentProp(item)
@@ -159,19 +168,27 @@ function App() {
 
 
           <Divider />
+          <div style={{ display: "flex", flexDirection: "column" }}>
+            <Button icon="eraser" text="Reset" />
+            <Button onClick={add} icon="plus" text="Add" />
+            <Button onClick={save} icon="save" text="Save" />
+          </div>
 
-          <Button icon="eraser" text="Reset" />
-
-          <Button onClick = {save}icon="floppy" text="Save" />
         </Card>
 
         <Card style={{ marginLeft: "50px", width: "200px", backgroundColor: Colors.LIGHT_GRAY5 }}>
           {
             loadedRooms.map((room) => {
               return <Card>
-                {
-                  room.x
-                }
+
+                <div>
+                  Width : {room.width}
+                </div>
+                <div>
+                  Height : {room.height}
+                </div>
+
+
               </Card>
             })
           }
@@ -182,11 +199,11 @@ function App() {
 
       <Card style={{ marginTop: "20px" }}>
         <div style={{ margin: "auto", display: "flex  " }}>
-          <Button onClick={() => setCurrentRotation(currentRotation + 90)} icon="image-rotate-left" />
+          <Button onClick={() => setCurrentRotation(state.currentRotation + 90)} icon="image-rotate-left" />
 
-          <InputGroup value={currentRotation} />
+          <InputGroup value={state.currentRotation} />
 
-          <Button onClick={() => setCurrentRotation(currentRotation - 90)} icon="image-rotate-right" />
+          <Button onClick={() => setCurrentRotation(state.currentRotation - 90)} icon="image-rotate-right" />
 
 
         </div>

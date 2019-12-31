@@ -36,11 +36,12 @@ export default function GridRenderer(props ) {
 export class Grid {
 
     constructor (props) {
-        this.rotation = props.currentRotation * Math.PI / 180;
+        this.rotation = props.currentRotation;
         this.addedProps = [];
-        this.props = props;
         this.width = props.width;
         this.height = props.height;
+        this.currentProp = props.currentProp;
+       
         this.tiles = [];
         for (var j = 0; j < props.height; j++) {
             for (var i = 0; i < props.width; i++) {
@@ -95,7 +96,7 @@ export class Grid {
         var list = [...this.addedProps];
         var x = position.x;
         var y = position.y;
-        var prop = this.props.currentProp;
+        var prop = this.currentProp;
         for (var i = 0; i < prop.width; i++) {
             for (var j = 0; j < prop.height; j++) {
                 var rotationX = Math.round(i * Math.cos(this.rotation) - j * Math.sin(this.rotation));
