@@ -8,6 +8,12 @@ import axios from "axios"
 axios.defaults.headers.common = {
   "Content-Type": "application/json"
 }
+var rotationIndicators = {
+  0 : "arrow-right",
+  90: "arrow-up",
+  180: "arrow-left",
+  270: "arrow-down"
+}
 
 var furniture = [
   {
@@ -54,11 +60,12 @@ function App() {
 
   const [loadedRooms, updateLoadedRooms] = useState([])
   const [state, setState] = useState({
+    rotation : 0,
     grid: new Grid({
       width: 10,
       height: 10,
       currentProp: furniture[0],
-      currentRotation: 0
+      rotation: 0
     })
   })
 
@@ -68,10 +75,14 @@ function App() {
     setState({ ...state, grid: grid })
   }
 
-  const setCurrentRotation = (rotation) => {
+  const setRotation = (rotation) => {
+    if (rotation < 0){
+      rotation = 270
+    }
     var grid = state.grid;
-    grid.currentRotation = rotation * Math.PI / 180;
-    setState({ ...state, currentRotation: rotation, grid: grid })
+
+    grid.setRotation(rotation)
+    setState({ ...state, rotation, grid: grid })
   }
 
 
@@ -110,11 +121,12 @@ function App() {
     event.preventDefault();
     var formData = new FormData(event.currentTarget);
     setState({
+      rotation : state.rotation,
       grid: new Grid({
         width: formData.get("width"),
         height: formData.get("height"),
         currentProp: state.grid.currentProp,
-        currentRotation: state.grid.currentRotation
+        rotation: state.grid.rotation
       })
     })
   }
@@ -199,11 +211,13 @@ function App() {
 
       <Card style={{ marginTop: "20px" }}>
         <div style={{ margin: "auto", display: "flex  " }}>
-          <Button onClick={() => setCurrentRotation(state.currentRotation + 90)} icon="image-rotate-left" />
+          <Button onClick={() => setRotation(state.rotation + 90)} icon="image-rotate-left" />
+          {
+            console.log(state.rotation % 360)
+          }
+          <Button icon = {rotationIndicators[state.rotation % 360]}/>
 
-          <InputGroup value={state.currentRotation} />
-
-          <Button onClick={() => setCurrentRotation(state.currentRotation - 90)} icon="image-rotate-right" />
+          <Button onClick={() => setRotation(state.rotation - 90)} icon="image-rotate-right" />
 
 
         </div>
