@@ -9,7 +9,7 @@ axios.defaults.headers.common = {
   "Content-Type": "application/json"
 }
 var rotationIndicators = {
-  0 : "arrow-right",
+  0: "arrow-right",
   90: "arrow-up",
   180: "arrow-left",
   270: "arrow-down"
@@ -60,7 +60,7 @@ function App() {
 
   const [loadedRooms, updateLoadedRooms] = useState([])
   const [state, setState] = useState({
-    rotation : 0,
+    rotation: 0,
     grid: new Grid({
       width: 10,
       height: 10,
@@ -76,7 +76,7 @@ function App() {
   }
 
   const setRotation = (rotation) => {
-    if (rotation < 0){
+    if (rotation < 0) {
       rotation = 270
     }
     var grid = state.grid;
@@ -89,7 +89,7 @@ function App() {
 
 
   if (loading) {
-    axios.get("http://127.0.0.1:3001/load", {
+    axios.get("http://localhost:3001/load", {
       headers: {
         'Access-Control-Allow-Origin': '*',
       },
@@ -104,7 +104,7 @@ function App() {
   }
   const save = (event) => {
     event.preventDefault();
-    axios.post("http://127.0.0.1:3001/save", {
+    axios.post("http://localhost:3001/save", {
       rooms: loadedRooms
     }).then((res) => {
       console.log(res)
@@ -121,7 +121,7 @@ function App() {
     event.preventDefault();
     var formData = new FormData(event.currentTarget);
     setState({
-      rotation : state.rotation,
+      rotation: state.rotation,
       grid: new Grid({
         width: formData.get("width"),
         height: formData.get("height"),
@@ -131,6 +131,24 @@ function App() {
     })
   }
 
+
+  const PropDisplay = (props) => {
+    var item = props.item;
+    return <Card
+      className={
+        state.grid.currentProp.name === item.name ? "bp3-dark" : ""
+      }
+      onClick={() =>
+        setCurrentProp(item)
+      }
+
+      style={{ display: "flex", padding: "5px", marginBottom: "10px" }}>
+      <Card style={{ backgroundColor: item.color, padding: "0px", width: "20px", height: "20px" }} />
+      <div style={{ marginLeft: '10px' }}>
+        {item.name}
+      </div>
+    </Card>
+  }
 
   return (
     <div style={{ margin: "100px" }}>
@@ -160,20 +178,7 @@ function App() {
           <div style={{ display: "flex", flexDirection: "column" }}>
             {
               furniture.map((item) => {
-                return <Card
-                  className={
-                    state.grid.currentProp.name === item.name ? "bp3-dark" : ""
-                  }
-                  onClick={() =>
-                    setCurrentProp(item)
-                  }
-
-                  style={{ display: "flex", padding: "5px", marginBottom: "10px" }}>
-                  <Card style={{ backgroundColor: item.color, padding: "0px", width: "20px", height: "20px" }} />
-                  <div style={{ marginLeft: '10px' }}>
-                    {item.name}
-                  </div>
-                </Card>
+                {PropDisplay({item : item})}
               })
             }
           </div>
@@ -215,7 +220,7 @@ function App() {
           {
             console.log(state.rotation % 360)
           }
-          <Button icon = {rotationIndicators[state.rotation % 360]}/>
+          <Button icon={rotationIndicators[state.rotation % 360]} />
 
           <Button onClick={() => setRotation(state.rotation - 90)} icon="image-rotate-right" />
 
@@ -226,5 +231,7 @@ function App() {
     </div>
   );
 }
+
+
 
 export default App;
