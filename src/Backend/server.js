@@ -23,7 +23,7 @@ app.post("/save", function (req, res) {
     res.send(200);
 })
 
-const port = process.env.PORT + 1;
+const port = parseInt(process.env.PORT) + 1 || 3001;
 const address = process.env.SERVER_ADDRESS || "localhost";
 
 app.listen(port, address, () => console.log(`Server running on http://${address}:${port}`));
