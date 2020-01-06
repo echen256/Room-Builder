@@ -89,14 +89,13 @@ function App() {
 
 
   if (loading) {
-    axios.get("/load", {
+    axios.get("http://localhost:3001/api/load", {
       headers: {
         'Access-Control-Allow-Origin': '*',
       },
     }).then((res) => {
       console.log(res)
       setLoading(false)
-
       updateLoadedRooms(res.data)
     })
 
@@ -104,7 +103,7 @@ function App() {
   }
   const save = (event) => {
     event.preventDefault();
-    axios.post("/save", {
+    axios.post("/api/save", {
       rooms: loadedRooms
     }).then((res) => {
       console.log(res)
