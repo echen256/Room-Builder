@@ -5,12 +5,12 @@ const fs = require(
     "fs"
 )
 
+var https = require('https');
 /* Init express */
 const app = express();
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(cors())
-console.log(__dirname)
 app.get("/load", function (req, res) {
     var file = fs.readFileSync(__dirname + "/Data/data.json", "utf8");
     res.send(file);
@@ -26,6 +26,7 @@ app.post("/save", function (req, res) {
 const port = parseInt(process.env.PORT) + 1 || 3001;
 const address = process.env.SERVER_ADDRESS || "localhost";
 
+console.log(address,port)
 app.listen(port, address, () => console.log(`Server running on http://${address}:${port}`));
 
 
