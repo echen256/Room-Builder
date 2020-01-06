@@ -56,6 +56,8 @@ var furniture = [
 
 function App() {
 
+
+  
   const [loading, setLoading] = useState(true);
 
   const [loadedRooms, updateLoadedRooms] = useState([])
@@ -89,7 +91,7 @@ function App() {
 
 
   if (loading) {
-    axios.get("http://localhost:3001/api/load", {
+    axios.get("/api/load", {
       headers: {
         'Access-Control-Allow-Origin': '*',
       },
