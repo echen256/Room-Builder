@@ -89,7 +89,7 @@ function App() {
 
 
   if (loading) {
-    axios.get("https://localhost:3001/load", {
+    axios.get("/load", {
       headers: {
         'Access-Control-Allow-Origin': '*',
       },
@@ -104,7 +104,7 @@ function App() {
   }
   const save = (event) => {
     event.preventDefault();
-    axios.post("https://localhost:3001/save", {
+    axios.post("/save", {
       rooms: loadedRooms
     }).then((res) => {
       console.log(res)

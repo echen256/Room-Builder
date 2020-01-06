@@ -15,13 +15,13 @@ app.get("/load", function (req, res) {
     var file = fs.readFileSync(__dirname + "/Data/data.json", "utf8");
     res.send(file);
 })
-
-
 app.post("/save", function (req, res) {
     var data = (JSON.stringify(req.body.rooms));
     fs.writeFileSync(__dirname + "/Data/data.json", data)
     res.send(200);
 })
+
+
 
 const port = 3001;
 const address = process.env.SERVER_ADDRESS || "localhost";
