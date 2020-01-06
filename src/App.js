@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Card, Colors, Button, InputGroup, Divider, H1 } from "@blueprintjs/core"
+import { Card, Colors, Button, InputGroup, Divider, H1, Popover, H3 } from "@blueprintjs/core"
 import { Grid } from "./Components/graph_renderer"
 import GridRenderer from "./Components/graph_renderer"
 import axios from "axios"
@@ -101,13 +101,35 @@ function App() {
     event.preventDefault();
     var formData = new FormData(event.currentTarget);
     setState({
-      rotation: state.rotation,
-      grid: new Grid({
-        width: formData.get("width"),
-        height: formData.get("height"),
-        currentProp: state.grid.currentProp,
-        rotation: state.grid.rotation
-      })
+      ...state, ...{
+        rotation: state.rotation,
+        grid: new Grid({
+          width: formData.get("width"),
+          height: formData.get("height"),
+          currentProp: state.grid.currentProp,
+          rotation: state.grid.rotation
+        })
+      }
+
+    })
+  }
+
+  const addFurniturePreset = (event) => {
+    event.preventDefault();
+    var formData = new FormData(event.currentTarget);
+    var furniturePreset = {
+      width: formData.get("width"),
+      height: formData.get('height'),
+      name: formData.get('name'),
+      color: formData.get('color')
+    }
+    state.furniture.push(furniturePreset)
+    setState({
+      ...state, ...{
+        furniture: state.furniture
+
+      }
+
     })
   }
 
@@ -140,6 +162,24 @@ function App() {
           }}
         >
 
+       
+            <div style={{ margin: "auto", display: "flex  " }}>
+              <Button onClick={() => setRotation(state.rotation + 90)} icon="image-rotate-left" />
+              {
+                console.log(state.rotation % 360)
+              }
+              <Button icon={rotationIndicators[state.rotation % 360]} />
+
+              <Button onClick={() => setRotation(state.rotation - 90)} icon="image-rotate-right" />
+
+
+            </div>
+        
+
+
+
+          <Divider />
+
           <GridRenderer grid={state.grid} />
 
 
@@ -149,7 +189,9 @@ function App() {
           <form onSubmit={changeRoomSize} >
 
             <InputGroup name="width" placeholder="Room Width" defaultValue={state.grid.width}></InputGroup>
+            <br />
             <InputGroup name="height" placeholder="Room Height" defaultValue={state.grid.height}></InputGroup>
+            <br />
             <InputGroup type="submit" />
           </form>
 
@@ -161,14 +203,41 @@ function App() {
                 return PropDisplay({ item: item })
               })
             }
+
+            <Popover>
+              <Button fill icon="plus" text="Add Prop" >  </Button>
+              <Card>
+                <form onSubmit={addFurniturePreset}>
+                  <InputGroup name="width" placeholder="Width..." />
+                  <br />
+                  <InputGroup name="height" placeholder="Height" />
+                  <br />
+                  <InputGroup name="name" placeholder="Name..." />
+                  <br />
+                  <InputGroup name="color" placeholder="Color Hex..." />
+                  <br />
+                  <InputGroup type="submit" value="Save Prop" />
+                </form>
+
+              </Card>
+            </Popover>
+
+
+
           </div>
 
 
+
+
           <Divider />
+          <br />
           <div style={{ display: "flex", flexDirection: "column" }}>
             <Button icon="eraser" text="Reset" />
+            <br />
             <Button onClick={add} icon="plus" text="Add" />
+            <br />
             <Button onClick={save} icon="save" text="Save" />
+            <br />
           </div>
 
         </Card>
@@ -176,7 +245,7 @@ function App() {
         <Card style={{ marginLeft: "50px", width: "200px", backgroundColor: Colors.LIGHT_GRAY5 }}>
           {
             state.loadedRooms.map((room) => {
-              return <Card>
+              return <Card style={{ marginTop: "10px", padding: "10px" }}>
 
                 <div>
                   Width : {room.width}
@@ -194,19 +263,7 @@ function App() {
 
       </div>
 
-      <Card style={{ marginTop: "20px" }}>
-        <div style={{ margin: "auto", display: "flex  " }}>
-          <Button onClick={() => setRotation(state.rotation + 90)} icon="image-rotate-left" />
-          {
-            console.log(state.rotation % 360)
-          }
-          <Button icon={rotationIndicators[state.rotation % 360]} />
 
-          <Button onClick={() => setRotation(state.rotation - 90)} icon="image-rotate-right" />
-
-
-        </div>
-      </Card>
 
     </div>
   );
