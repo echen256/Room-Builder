@@ -1,12 +1,9 @@
 const express = require('express');
 var bodyParser = require('body-parser')
 const cors = require('cors');
-var httpProxy = require('http-proxy');
 const fs = require(
     "fs"
 )
-
-
 
 /* Init express */
 const app = express();
@@ -28,12 +25,8 @@ app.post("/save", function (req, res) {
 
 const port = process.env.PORT || 3001;
 const address = process.env.SERVER_ADDRESS || "localhost";
-var routing = {
-  '/devices': { port: process.env.DEVICES_PORT || 80, host: process.env.DEVICES_URI }
-}
 
-httpProxy.createServer(
-  require('./lib/uri-middleware')(routing)
-).listen(port);
+app.listen(port, address, () => console.log(`Server running on http://${address}:${port}`));
+
 
 module.exports = app;
