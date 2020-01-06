@@ -20,14 +20,12 @@
     "react-scripts": "3.3.0"
   },
   "scripts": {
-    "start": " react-scripts start ",
+    "start": "react-scripts start ",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "server": "node ./src/Backend/server.js",
-    "dev": "concurrently \"yarn server\" \"yarn start\"",
-    "predeploy": "yarn run build",
-   "deploy": "gh-pages -d build"
+    "dev": "concurrently \"yarn server\" \"yarn start\""
   },
   "eslintConfig": {
     "extends": "react-app"
