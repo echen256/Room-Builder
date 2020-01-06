@@ -26,8 +26,15 @@ app.post("/api/save", function (req, res) {
     res.send(200);
 })
 
-
-
+if (process.env.NODE_ENV === "production") {
+    // Express will serve up production assets
+    app.use(express.static("build"));
+  
+    // Express will serve up the front-end index.html file if it doesn't recognize the route
+    app.get("*", (req, res) =>
+      res.sendFile(path.resolve("build", "index.html"))
+    );
+}
 
 
 app.listen(port, address, () => console.log(`Server running on http://${address}:${port}`));
