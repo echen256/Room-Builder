@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { Card, Colors, Button, InputGroup, Divider, H1 } from "@blueprintjs/core"
 import { Grid } from "./Components/graph_renderer"
 import GridRenderer from "./Components/graph_renderer"
-
 import axios from "axios"
 
 axios.defaults.headers.common = {
@@ -15,58 +14,17 @@ var rotationIndicators = {
   270: "arrow-down"
 }
 
-var furniture = [
-  {
-    width: 2,
-    height: 2,
-    name: "Bed",
-    color: Colors.BLUE1
-  },
-  {
-    width: 1,
-    height: 1,
-    name: "Wardrobe",
-    color: Colors.INDIGO1
-  },
-  {
-    width: 2,
-    height: 1,
-    name: "Desk",
-    color: Colors.RED1
-  },
-  {
-    width: 1,
-    height: 1,
-    name: "Drawer Cabinet",
-    color: Colors.GREEN1
-  },
-  {
-    width: 1,
-    height: 1,
-    name: "End Table",
-    color: Colors.GOLD1
-  },
-  {
-    width: 1,
-    height: 1,
-    name: "Erase",
-    color: Colors.LIGHT_GRAY5
-  }
-]
-
 function App() {
 
 
-  
-  const [loading, setLoading] = useState(true);
-
-  const [loadedRooms, updateLoadedRooms] = useState([])
   const [state, setState] = useState({
+    loading: true,
     rotation: 0,
+    furniture: [],
+    loadedRooms: [],
     grid: new Grid({
       width: 10,
       height: 10,
-      currentProp: furniture[0],
       rotation: 0
     })
   })
@@ -87,18 +45,37 @@ function App() {
     setState({ ...state, rotation, grid: grid })
   }
 
+  const updateLoadedRooms = (rooms) => {
+    setState({
+      ...state, ...{
+        loadedRooms: rooms
+      }
+    })
+  }
 
 
 
-  if (loading) {
+  if (state.loading) {
     axios.get("/api/load", {
       headers: {
         'Access-Control-Allow-Origin': '*',
       },
     }).then((res) => {
       console.log(res)
-      setLoading(false)
-      updateLoadedRooms(res.data)
+      var grid = state.grid;
+      grid.currentProp = res.data.props[0];
+      setState(
+        {
+          ...state
+          , ...{
+            loading: false,
+            furniture: res.data.props,
+            loadedRooms: res.data.rooms,
+            currentProp: res.data.props,
+            grid: grid
+          }
+        }
+      )
     })
 
     return <div />
@@ -106,7 +83,8 @@ function App() {
   const save = (event) => {
     event.preventDefault();
     axios.post("/api/save", {
-      rooms: loadedRooms
+      rooms: state.loadedRooms,
+      props: state.furniture
     }).then((res) => {
       console.log(res)
     })
@@ -114,6 +92,7 @@ function App() {
 
   const add = (event) => {
     event.preventDefault();
+    var loadedRooms = state.loadedRooms;
     loadedRooms.push(state.grid.exportGrid())
     updateLoadedRooms([...loadedRooms])
   }
@@ -178,8 +157,8 @@ function App() {
 
           <div style={{ display: "flex", flexDirection: "column" }}>
             {
-              furniture.map((item) => {
-                {PropDisplay({item : item})}
+              state.furniture.map((item) => {
+                return PropDisplay({ item: item })
               })
             }
           </div>
@@ -196,7 +175,7 @@ function App() {
 
         <Card style={{ marginLeft: "50px", width: "200px", backgroundColor: Colors.LIGHT_GRAY5 }}>
           {
-            loadedRooms.map((room) => {
+            state.loadedRooms.map((room) => {
               return <Card>
 
                 <div>

@@ -20,16 +20,15 @@ app.use(express.static(path.join(__dirname, 'build')));
 //app.use(proxy(["/api/"], {target : "http://localhost:3001"}))
 
 app.get("/api/load", function (req, res) {
-    console.log(__dirname + "/Data/data.json")
-    var file = fs.readFileSync(__dirname + "/Data/data.json", "utf8");
-    res.send(file);
+    var rooms = JSON.parse(fs.readFileSync(__dirname + "/Data/data.json", "utf8"));
+    var props = JSON.parse(fs.readFileSync(__dirname + "/Data/props.json", "utf8"));
+    res.send({rooms, props});
 })
 app.post("/api/save", function (req, res) {
-    var data = (JSON.stringify(req.body.rooms));
-    fs.writeFileSync(__dirname + "/Data/data.json", data)
+    fs.writeFileSync(__dirname + "/Data/data.json", JSON.stringify(req.body.rooms));
+    fs.writeFileSync(__dirname + "/Data/props.json", JSON.stringify(req.body.props))
     res.send(200);
 })
-
 
 app.listen(port, address, () => console.log(`Server running on http://${address}:${port}`));
 
