@@ -29,5 +29,7 @@ const address = process.env.SERVER_ADDRESS || "localhost";
 console.log(address,port)
 app.listen(port, address, () => console.log(`Server running on http://${address}:${port}`));
 
+app.address = address + ":" + port
+console.log(app, port, address)
 
 module.exports = app;
