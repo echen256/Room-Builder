@@ -1,0 +1,9 @@
+export { default as Layout1 } from './layout1.png';
+export { default as Layout2 } from './layout2.png';
+export { default as Layout3 } from './layout3.png';
+export { default as Layout4 } from './layout4.png';
+export { default as Layout5 } from './layout5.png';
+export { default as Layout6 } from './layout6.png';
+export { default as Layout7 } from './layout7.png';
+export { default as Layout8 } from './layout8.png';
+export { default as Layout9 } from './layout9.png';
