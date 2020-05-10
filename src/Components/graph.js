@@ -1,6 +1,7 @@
 
 import React, { useState } from 'react';
 import { Card, Colors, Button } from "@blueprintjs/core"
+import Rect from "./rect"
 
 export default  class Grid {
     setRotation = (degrees) => {
@@ -20,6 +21,7 @@ export default  class Grid {
         this.width = props.width;
         this.height = props.height;
         this.currentProp = props.currentProp;
+        this.boundingRect = new Rect(this.width,this.height,0,0);
        
         this.tiles = [];
         for (var j = 0; j < props.height; j++) {
@@ -48,10 +50,10 @@ export default  class Grid {
                 )
             }
         }
-        this.addedProps.forEach((prop) => {
+        this.addedProps.forEach((prop) => { 
             this.currentProp = prop;
             this.rotation = prop.rotation;
-            this.addProp(prop)
+            this.addProp(prop ,   prop.position )
         })
     }
   
@@ -63,18 +65,35 @@ export default  class Grid {
             height : this.height
         }
     }
+ 
+ 
+    addProp = (prop,position) => {   
 
-    editProp = (event) => {
-        var position = JSON.parse(event.currentTarget.value);
-      
-        var x = position.x;
-        var y = position.y;
-        var tile = this.getTile(x, y);
-        if (tile.prop !== undefined) {
-            this.deleteProp(position)
-        } else {
-            this.addProp(position)
+        var rect = new Rect(prop.width,prop.height, position.x,position.y);
+   
+        rect = rect.getRotatedRect(this.rotation);
+        
+        
+        var canAdd = this.boundingRect.contains(rect); 
+        this.addedProps.forEach((addedProp) => {
+            var addedRect = new Rect(addedProp.rect.width, addedProp.rect.height, addedProp.rect.x, addedProp.rect.y)
+            var rotatedProp = addedRect.getRotatedRect(addedProp.rotation);
+            if ( rotatedProp.overlaps(rect)) {
+                canAdd = false;
+            }
+        })
+
+        if (canAdd){
+            this.addedProps.push({
+                ...prop, rect, ...{position}, rotation : this.rotation, degrees : this.degrees
+            })
         }
+    }
+
+
+   addPropEvent = (event) => {
+        var props = JSON.parse(event.target.value)
+         this.addProp(props.prop,props.position);
     }
 
     deleteProp = (position) => {
@@ -95,69 +114,31 @@ export default  class Grid {
         this.brush(eraseProp, true)
     }
 
+ 
+    // brush = (data, erasing) => {
+    //     var operations = [];
+    //     for (var i = 0; i < data.width; i++) {
+    //         for (var j = 0; j < data.height; j++) {
+    //             var rotationX = Math.round(i * Math.cos(data.rotation) - j * Math.sin(data.rotation));
+    //             var rotationY = Math.round(i * Math.sin(data.rotation) + j * Math.cos(data.rotation));
+    //             var tile = this.getTile(rotationX + data.x, rotationY + data.y);
+    //             if (tile === undefined) return;
+    //             operations.push({ tile, color: data.color })
 
+    //         }
+    //     }
+    //     operations.forEach((operation) => {
+    //         operation.tile.color = operation.color;
 
-    addProp = (position) => {
-       
-        var list = [...this.addedProps];
-        var x = position.x;
-        var y = position.y;
-        var prop = this.currentProp;  
-        let valid = true;
-        let rotation = this.getRadians(this.degrees)
-        console.log(this.degrees)
-        console.log(rotation)
-        let points = []
-        for (var i = 0; i < prop.width; i++) {
-            for (var j = 0; j < prop.height; j++) {
+    //         if (erasing) {
+    //             operation.tile.prop = undefined
 
-                var rotationX = Math.round(i * Math.cos(rotation) - j * Math.sin(rotation));
-                var rotationY = Math.round(i * Math.sin(rotation) + j * Math.cos( rotation));
-                var tile = this.getTile(rotationX + x, rotationY + y);
-                points.push(tile)
-                if (tile === undefined) valid = false;
-                else  if (tile.prop !== undefined) valid = false;
-            }
-        }
+    //         } else {
+    //             operation.tile.prop = data;
+    //         }
+    //     });
 
-        console.log(valid)
-        if (!valid )return;
-        var newProp = {...prop,
-            rotation : rotation, x, y , degrees : this.degrees, 
-            points
-        }
-
-        list.push(newProp);
-        this.addedProps = list;
-        this.brush(newProp, false);
-
-        console.log(newProp, this.addedProps)
-    }
-
-    brush = (data, erasing) => {
-        var operations = [];
-        for (var i = 0; i < data.width; i++) {
-            for (var j = 0; j < data.height; j++) {
-                var rotationX = Math.round(i * Math.cos(data.rotation) - j * Math.sin(data.rotation));
-                var rotationY = Math.round(i * Math.sin(data.rotation) + j * Math.cos(data.rotation));
-                var tile = this.getTile(rotationX + data.x, rotationY + data.y);
-                if (tile === undefined) return;
-                operations.push({ tile, color: data.color })
-
-            }
-        }
-        operations.forEach((operation) => {
-            operation.tile.color = operation.color;
-
-            if (erasing) {
-                operation.tile.prop = undefined
-
-            } else {
-                operation.tile.prop = data;
-            }
-        });
-
-    }
+    // }
 
     getTile = (x, y) => {
         var index = this.getIndex(x, y);

@@ -51,13 +51,12 @@ function App() {
       headers: {
         'Access-Control-Allow-Origin': '*',
       },
-    }).then((res) => {
-      console.log(res)
+    }).then((res) => { 
       var grid = state.grid;
       let furnitureData = res.data.props;
       let furnitureCategories = Object.keys(res.data.props);
-      let currentCategory = furnitureCategories[0]
-      grid.currentProp = res.data.props[0];
+      let currentCategory = furnitureCategories[0] 
+      grid.currentProp = furnitureData[currentCategory]
       setState(
         {
           ...state
@@ -82,8 +81,7 @@ function App() {
     axios.post("/api/save", {
       rooms: state.loadedRooms,
       props: state.furnitureData
-    }).then((res) => {
-      console.log(res)
+    }).then((res) => { 
     })
   }
 
@@ -126,8 +124,8 @@ function App() {
       color: formData.get('color')
     }
     state.furnitureData[state.currentCategory].push(furniturePreset)
-    let length = state.furnitureData[state.currentCategory].length
-    console.log(state.furnitureData)
+    let length = state.furnitureData[state.currentCategory].length 
+
     setState({
       ...state,
       furnitureData: state.furnitureData,
@@ -139,8 +137,7 @@ function App() {
     event.preventDefault();
     var formData = new FormData(event.currentTarget);
 
-    let category_name = formData.get("category_name");
-    console.log(state.furnitureData, category_name)
+    let category_name = formData.get("category_name"); 
     if (state.furnitureData[category_name] === undefined) {
       state.furnitureData[category_name] = [];
       setState({
@@ -212,8 +209,7 @@ function App() {
     state.furnitureData[state.currentCategory] = furniture;
     setState({ ...state, furnitureData: state.furnitureData })
   }
-
-  console.log(state.currentProp)
+ 
   return (
     <div style={{ margin: "100px" }}>
       <div style={{ display: "flex" }}>
@@ -382,13 +378,10 @@ function App() {
                 </div>
 
                 <Button icon = "trash" onClick={
-                  () => {
-                    console.log(index)
-                    let loadedRooms = [...state.loadedRooms];
-                    console.log(loadedRooms.length)
+                  () => { 
+                    let loadedRooms = [...state.loadedRooms]; 
               
-                    loadedRooms.splice(index, 1);
-                    console.log(loadedRooms.length)
+                    loadedRooms.splice(index, 1); 
                     setState({ ...state, loadedRooms: [...state.loadedRooms] })
                   }
                 } />
