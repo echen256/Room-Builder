@@ -33,8 +33,8 @@ function Generator() {
 
 
     // const width = Math.floor(Math.random() * 7) + 3;
-    const width = 7;
-    const height = 11;
+    const width = Math.floor(Math.random() * 5 + 5);
+    const height = Math.floor(Math.random() * 5 + 5);
     const [state, setState] = useState({
         loading: true,
         rotation: 0,
@@ -48,26 +48,13 @@ function Generator() {
     })
 
     const parseResults = ({ divisionWidth, sectionWidth, divisionCount, rect }, vertical) => {
+
+
         var rects = [];
-
-
-        for (var i = 0; i < divisionCount; i++) {
-            if (vertical) {
-                rects.push({
-                    width: divisionWidth, height: rect.height, x: (i + 1) * sectionWidth + rect.x + (i * divisionWidth), y: rect.y, color: "red"
-                })
-
-            } else {
-                rects.push({
-                    width: rect.width,
-                    height: divisionWidth,
-                    x: rect.x, y: (i + 1) * sectionWidth + rect.x + (i * divisionWidth), color: "red"
-                })
-            }
-        }
-
         for (var i = 0; i < divisionCount + 1; i++) {
+
             if (vertical) {
+
                 rects.push({
                     width: sectionWidth, height: rect.height, x: i * (sectionWidth + divisionWidth) + rect.x, y: rect.y, color: "green"
                 })
@@ -76,37 +63,28 @@ function Generator() {
                     width: rect.width, height: sectionWidth, x: rect.x, y: i * (sectionWidth + divisionWidth) + rect.y, color: "green"
                 })
             }
-
         }
-
-
-        // for (var i = 0; i < divisionCount;i++){
-        //     rects.push({
-        //         width : divisionWidth , height : rect.height, x : (i +1)* sectionWidth + rect.x + (i * divisionWidth) , y : rect.y, color : "red"
-        //     })
-        // }
-
-        // for (var i = 0; i < divisionCount + 1;i++){
-        //     rects.push({
-        //         width : sectionWidth, height : rect.height, x : i *( sectionWidth + divisionWidth) + rect.x, y : rect.y, color : "green"
-        //     })
-        // } 
-
-
-
-
-        console.log(rects)
+ 
         return rects;
     }
 
-    const subdivide = (width, height, vertical) => {
+    const subdivide = (rect, results, vertical, iterations) => {
 
+        if (iterations < 1) {
+            results.push(rect);
+            return;
+        }
+        var width = rect.width;
+        var height = rect.height;
+        // if ((width < 3 && height < 6) || (width < 6 && height < 3)) {
+        //     results.push(rect);
+        //     return;
+        // }
 
-        let divisionWidths = [1, 2, 3 ];
+        let divisionWidths = [1 ,2];
         let minDivisions = 1;
-        let maxDivisions = parseInt(Math.round(width/2) );
-
-        let maxSectionWidth = parseInt(Math.round(width/ 2));
+        let maxDivisions = parseInt(Math.round(width / 2));
+        let maxSectionWidth = parseInt(Math.round(width / 2));
         let minSectionWidth = 1;
 
         //division equation = (number of divisions + 1) * section_width + number of divisions * division_width = totalWidth
@@ -114,8 +92,7 @@ function Generator() {
         //then the possible solutions are 20 = (1 + 1) * 9 + 1 * 2
         // 20 = (2 +  1) * 6   + 2 * 1
 
-
-        let results = [];
+        var possibleSolutions = [];
 
         for (var i = minSectionWidth; i <= maxSectionWidth; i++) {
             for (var j = minDivisions; j <= maxDivisions; j++) {
@@ -123,18 +100,16 @@ function Generator() {
 
 
                     var equation = (j + 1) * i + j * divisionWidths[k];
-                 
+
                     var quantity = width;
-                    if (! vertical) quantity = height;
+                    if (!vertical) quantity = height;
 
                     if (equation === quantity) {
-                        results.push({
+                        possibleSolutions.push({
                             divisionWidth: divisionWidths[k],
                             sectionWidth: i,
                             divisionCount: j,
-                            rect: {
-                                width, height, x: 0, y: 0
-                            }
+                            rect
                         })
 
 
@@ -142,9 +117,16 @@ function Generator() {
                 }
             }
         }
-        console.log(results)
-        return results.map((result) => {
-            return parseResults(result, vertical)
+
+        if (possibleSolutions.length === 0) {
+            results.push(rect);
+            return;
+        }
+
+        var nextSolution = possibleSolutions[ Math.floor(Math.random() * possibleSolutions.length  )]
+
+        parseResults(nextSolution, vertical).forEach((result_rect) => {
+            subdivide(result_rect, results, result_rect.width > result_rect.height, iterations-1)
         })
     }
 
@@ -161,32 +143,34 @@ function Generator() {
     // }
 
 
-    let results = subdivide(width, height, false);
+    var rect = { width, height, x: 0, y: 0 };
+    var iterations = 3;
+    var results = [];
+    
+    subdivide(rect, results, false, iterations);
+    
 
 
+    var newGrid = new Grid({ width, height, rotation: 0 });
+
+    results.map((rect) => {
+
+
+        for (var i = 0; i < rect.width; i++) {
+            for (var j = 0; j < rect.height; j++) {
+                newGrid.getTile(i + rect.x, j + rect.y).color = rect.color;
+            }
+        }
+    })
 
     return (
         <div style={{ margin: "auto", marginTop: "100px", width: "fit-content" }}>
             <Button  >
                 Subdivide
             </Button>
+            <div><GridRenderer currentProp={state.currentProp} grid={newGrid} /><br /></div>
 
-            {
-                results.map((result_rects) => {
 
-                    var newGrid = new Grid({ width, height, rotation: 0 });
-                    console.log(result_rects)
-                    result_rects.forEach(rect => {
-                        for (var i = 0; i < rect.width; i++) {
-                            for (var j = 0; j < rect.height; j++) {
-                                newGrid.getTile(i + rect.x, j + rect.y).color = rect.color;
-                            }
-                        }
-
-                    });
-                    return <div><GridRenderer currentProp={state.currentProp} grid={newGrid} /><br/></div>
-                })
-            }
         </div>
     );
 }
