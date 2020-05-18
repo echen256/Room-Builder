@@ -32,9 +32,21 @@ class Prop {
 function Generator() {
 
 
-    // const width = Math.floor(Math.random() * 7) + 3;
-    const width = Math.floor(Math.random() * 5 + 5);
-    const height = Math.floor(Math.random() * 5 + 5);
+    const width = Math.floor(Math.random() * 6 + 3);
+    const height = Math.floor(Math.random() * 6 + 3);
+    var minWidth = 1;
+    var minHeight = 1;
+    var maxHeight = 4;
+    var maxWidth = 4;
+    var maxArea = 6;
+
+    var rect = { width, height, x: 0, y: 0 };
+    var iterations = 10;
+    var results = [];
+
+
+    var newGrid = new Grid({ width, height, rotation: 0 });
+
     const [state, setState] = useState({
         loading: true,
         rotation: 0,
@@ -47,24 +59,43 @@ function Generator() {
         })
     })
 
-    const parseResults = ({ divisionWidth, sectionWidth, divisionCount, rect }, vertical) => {
-
+    const parseResults = (rect, divisionWidth, vertical) => {
 
         var rects = [];
-        for (var i = 0; i < divisionCount + 1; i++) {
+        var area = rect.width * rect.height
 
-            if (vertical) {
 
-                rects.push({
-                    width: sectionWidth, height: rect.height, x: i * (sectionWidth + divisionWidth) + rect.x, y: rect.y, color: "green"
-                })
-            } else {
-                rects.push({
-                    width: rect.width, height: sectionWidth, x: rect.x, y: i * (sectionWidth + divisionWidth) + rect.y, color: "green"
-                })
-            }
+        if (rect.width === minWidth && area > maxArea) {
+            vertical = true;
+        } else if (rect.height === minHeight && area > maxArea) {
+            vertical = false
+        } else if (area <= maxArea) {
+            rects.push(rect)
+            return rects;
         }
- 
+
+
+        if (vertical) {
+            var w = Math.max(minWidth, Math.floor(Math.random() * rect.width / 2));
+
+            rects.push({
+                width: w, height: rect.height, x: rect.x, y: rect.y, color: "green"
+            })
+            rects.push({
+                width: rect.width - w - divisionWidth, height: rect.height, x: w + rect.x + divisionWidth, y: rect.y, color: "green"
+            })
+        } else {
+            var h = Math.max(minHeight, Math.floor((Math.random() * rect.height / 2) + (rect.height / 4)));
+
+            rects.push({
+                width: rect.width, height: h, x: rect.x, y: rect.y, color: "green"
+            })
+            rects.push({
+                width: rect.width, height: rect.height - h - divisionWidth, x: rect.x, y: rect.y + h + divisionWidth, color: "green"
+            })
+
+        }
+
         return rects;
     }
 
@@ -74,84 +105,25 @@ function Generator() {
             results.push(rect);
             return;
         }
-        var width = rect.width;
-        var height = rect.height;
-        // if ((width < 3 && height < 6) || (width < 6 && height < 3)) {
-        //     results.push(rect);
-        //     return;
-        // }
-
-        let divisionWidths = [1 ,2];
-        let minDivisions = 1;
-        let maxDivisions = parseInt(Math.round(width / 2));
-        let maxSectionWidth = parseInt(Math.round(width / 2));
-        let minSectionWidth = 1;
-
-        //division equation = (number of divisions + 1) * section_width + number of divisions * division_width = totalWidth
-        //so lets say we are dividng by 20 and the divsion width is 1
-        //then the possible solutions are 20 = (1 + 1) * 9 + 1 * 2
-        // 20 = (2 +  1) * 6   + 2 * 1
-
-        var possibleSolutions = [];
-
-        for (var i = minSectionWidth; i <= maxSectionWidth; i++) {
-            for (var j = minDivisions; j <= maxDivisions; j++) {
-                for (var k = 0; k < divisionWidths.length; k++) {
 
 
-                    var equation = (j + 1) * i + j * divisionWidths[k];
-
-                    var quantity = width;
-                    if (!vertical) quantity = height;
-
-                    if (equation === quantity) {
-                        possibleSolutions.push({
-                            divisionWidth: divisionWidths[k],
-                            sectionWidth: i,
-                            divisionCount: j,
-                            rect
-                        })
-
-
-                    }
-                }
-            }
-        }
-
-        if (possibleSolutions.length === 0) {
-            results.push(rect);
+        var subdivsions = parseResults(rect, 1, vertical);
+        if (subdivsions.length === 1) {
+            results.push(subdivsions[0]);
             return;
         }
 
-        var nextSolution = possibleSolutions[ Math.floor(Math.random() * possibleSolutions.length  )]
-
-        parseResults(nextSolution, vertical).forEach((result_rect) => {
-            subdivide(result_rect, results, result_rect.width > result_rect.height, iterations-1)
+        subdivsions.forEach((result_rect) => {
+            subdivide(result_rect, results, result_rect.width > result_rect.height, iterations - 1)
         })
     }
 
 
-    // const PrimeFactorization = (number) => {
-    //     let primes = [];
-    //     let half = parseInt(Math.floor(number/2))
-    //     for (var i = 2; i <= number/2;i++){
-    //         while (number/i === 0){
-    //             primes.push(i);
-    //             num
-    //         }
-    //     }
-    // }
 
 
-    var rect = { width, height, x: 0, y: 0 };
-    var iterations = 3;
-    var results = [];
-    
+
     subdivide(rect, results, false, iterations);
-    
 
-
-    var newGrid = new Grid({ width, height, rotation: 0 });
 
     results.map((rect) => {
 
