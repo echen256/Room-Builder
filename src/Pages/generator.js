@@ -4,6 +4,7 @@ import Grid from "./../Components/graph"
 import GridRenderer from "./../Components/graph_renderer"
 import axios from "axios"
 import "./../layouts/index";
+import Rect from '../Components/rect';
 
 axios.defaults.headers.common = {
     "Content-Type": "application/json"
@@ -32,115 +33,94 @@ class Prop {
 function Generator() {
 
 
-    const width = Math.floor(Math.random() * 6 + 3);
-    const height = Math.floor(Math.random() * 6 + 3);
-    var minWidth = 1;
-    var minHeight = 1;
-    var maxHeight = 4;
-    var maxWidth = 4;
-    var maxArea = 6;
-
-    var rect = { width, height, x: 0, y: 0 };
-    var iterations = 10;
-    var results = [];
+    const width = 50
+    const height = 50;
 
 
     var newGrid = new Grid({ width, height, rotation: 0 });
+        var rects = []
+    const fill = (x, y, probability) => {
 
-    const [state, setState] = useState({
-        loading: true,
-        rotation: 0,
-        furniture: [],
-        loadedRooms: [],
-        grid: new Grid({
-            width,
-            height,
-            rotation: 0
-        })
-    })
+            newGrid.getTile(x, y).color = Colors.RED1
+            rects.push(new Rect(1, 1, x, y));
+            for (var i = -1; i < 2; i++) {
+                for (var j = -1; j < 2; j++) {
+                    if (Math.abs(i) + Math.abs(j) === 1) {
+                        if (Math.random() < probability) {
 
-    const parseResults = (rect, divisionWidth, vertical) => {
-
-        var rects = [];
-        var area = rect.width * rect.height
-
-
-        if (rect.width === minWidth && area > maxArea) {
-            vertical = true;
-        } else if (rect.height === minHeight && area > maxArea) {
-            vertical = false
-        } else if (area <= maxArea) {
-            rects.push(rect)
-            return rects;
-        }
-
-
-        if (vertical) {
-            var w = Math.max(minWidth, Math.floor(Math.random() * rect.width / 2));
-
-            rects.push({
-                width: w, height: rect.height, x: rect.x, y: rect.y, color: "green"
-            })
-            rects.push({
-                width: rect.width - w - divisionWidth, height: rect.height, x: w + rect.x + divisionWidth, y: rect.y, color: "green"
-            })
-        } else {
-            var h = Math.max(minHeight, Math.floor((Math.random() * rect.height / 2) + (rect.height / 4)));
-
-            rects.push({
-                width: rect.width, height: h, x: rect.x, y: rect.y, color: "green"
-            })
-            rects.push({
-                width: rect.width, height: rect.height - h - divisionWidth, x: rect.x, y: rect.y + h + divisionWidth, color: "green"
-            })
-
-        }
-
-        return rects;
-    }
-
-    const subdivide = (rect, results, vertical, iterations) => {
-
-        if (iterations < 1) {
-            results.push(rect);
-            return;
-        }
-
-
-        var subdivsions = parseResults(rect, 1, vertical);
-        if (subdivsions.length === 1) {
-            results.push(subdivsions[0]);
-            return;
-        }
-
-        subdivsions.forEach((result_rect) => {
-            subdivide(result_rect, results, result_rect.width > result_rect.height, iterations - 1)
-        })
-    }
-
-
-
-
-
-    subdivide(rect, results, false, iterations);
-
-
-    results.map((rect) => {
-
-
-        for (var i = 0; i < rect.width; i++) {
-            for (var j = 0; j < rect.height; j++) {
-                newGrid.getTile(i + rect.x, j + rect.y).color = rect.color;
+                            fill(x + i, j + y, probability / 2)
+                        }
+                    }
+                }
             }
         }
-    })
+ 
+    rects.forEach(element => {
+        
+        newGrid.getTile(element.x, element.y).color = Colors.RED1 
+    });
+
+    const processRects = (rects) => {
+        for (var i = 0; i < rects.length; i++) {
+            var r = rects[i];
+            
+            
+            var adjustedHeight = 2;// Math.floor(Math.random() * 3);
+            var adjustedWidth = 2;//Math.floor(Math.random() * 3);
+           
+            var upperRightCorner = [r.x + r.width , r.y +r.height ]
+          
+
+           
+
+            for (var j = 0; j < rects.length; j++) {
+                if (j !== i) {
+                    var r2 = rects[j];
+                    var minimumCorner = [r2.x , r2.y ]
+
+                    if (minimumCorner[0]  >   upperRightCorner[0]) {
+                        r2.x += adjustedWidth
+                    }
+
+                    if (minimumCorner[1] >   upperRightCorner[1]) {
+                        r2.y += adjustedHeight
+                    }
+                }
+
+            }
+
+            r.width += adjustedWidth
+            r.height += adjustedHeight
+
+            for (var q = 0; q < r.width; q++) {
+                for (var p = 0; p < r.height; p++) {
+                    var q2 = r.x + q ;
+                    var p2 = r.y + p + 10;
+                 
+                    if (newGrid.getTile(q2,p2) !== undefined){
+                        if (newGrid.getTile(q2,p2).color !== Colors.RED1){
+                        
+                            newGrid.getTile(q2,p2).color = Colors.GREEN1
+                        } 
+                    }
+                }
+            }
+
+        }
+
+    }
+
+     fill(25, 25, .75);
+    processRects(rects)
+
+  
 
     return (
         <div style={{ margin: "auto", marginTop: "100px", width: "fit-content" }}>
             <Button  >
                 Subdivide
             </Button>
-            <div><GridRenderer currentProp={state.currentProp} grid={newGrid} /><br /></div>
+            <div><GridRenderer grid={newGrid} /><br /></div>
 
 
         </div>
