@@ -25,10 +25,8 @@ export default function GridRenderer(props) {
                 <button
                     key={key} 
                     value={JSON.stringify({prop : props.currentProp, position : { x: i, y: j }})}
-                    onClick={(event) => { 
-                        grid.addPropEvent(event);
-                        triggerUpdate(!update)
-                    }} style={{ zIndex : 1,backgroundColor: tile.color, color : "black",width: "25px", height: "25px", borderWidth: "1px", borderColor: Colors.GRAY1, borderStyle: "solid    " }}>
+                    style={{ zIndex : 1,backgroundColor: tile.color, color : "black",width: "25px", 
+                    height: "25px", borderWidth: "1px", borderColor: Colors.GRAY1, borderStyle: "solid    " }}>
 
                 </button>
 
@@ -41,12 +39,8 @@ export default function GridRenderer(props) {
     var pixelWidth = 25 * grid.width ;
     var pixelHeight = 25 * grid.height  ; 
 
-
-
     const getOverlay = (prop,index) =>{
         var rect = new Rect(prop.rect.width,prop.rect.height, prop.rect.x,prop.rect.y);
-         
-        
         rect =  rect.getRotatedRect(prop.rotation)
       
          return <div style={{ 

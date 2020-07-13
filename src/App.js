@@ -4,6 +4,7 @@ import axios from "axios"
 import { Route, Switch, BrowserRouter, Link } from "react-router-dom"
 import Editor from "./Pages/editor"
 import Generator from "./Pages/generator"
+import RoomLayout from "./Pages/room-layout"
 
 axios.defaults.headers.common = {
   "Content-Type": "application/json"
@@ -26,6 +27,8 @@ function App() {
           <Link to="/editor">Editor</Link>
           <Divider />
           <Link to="/generator">Generator</Link>
+          <Divider/>
+          <Link to="/">Room Layout</Link>
         </Navbar.Group>
        
       </Navbar>
@@ -34,6 +37,9 @@ function App() {
         </Route>
         <Route path="/generator">
           <Generator />
+        </Route>
+        <Route  >
+          <RoomLayout />
         </Route>
     </BrowserRouter>
   </div>
