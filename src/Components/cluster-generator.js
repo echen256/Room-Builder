@@ -152,7 +152,7 @@ const insertPaths = (rects) => {
      }
 }
 
-const standardDivision = (newGrid) => {
+export const standardDivision = (newGrid) => {
     var rects = []
     fill( 5,  5, .95 ,rects);
 
@@ -186,27 +186,7 @@ const standardDivision = (newGrid) => {
    
 
     }
-    output.paths.forEach((r) => {
-        drawRect(r, Colors.GOLD1, 10)
-    })
-    output.nonPaths.forEach((r) => {
-        drawRect(r, Colors.GREEN1, 10)
-    })
-    rects.forEach((r) => {
-        for (var q = 0; q < r.width; q++) {
-            for (var p = 0; p < r.height; p++) {
-                var q2 = r.x + q;
-                var p2 = r.y + p;
-
-                if (newGrid.getTile(q2, p2) !== undefined) {
-
-                    newGrid.getTile(q2, p2).color = Colors.RED1
-
-                }
-            }
-        }
-
-    })
+    return output;
 }
 
 export const basicClusterGenerator = (newGrid) => {

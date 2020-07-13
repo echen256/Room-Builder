@@ -6,15 +6,15 @@ import axios from 'axios';
 import './../layouts/index';
 import Rect from '../Components/rect';
 import {generateLayout} from "../Components/room-layout-generator"
-import {basicClusterGenerator} from "../Components/cluster-generator"
+import {basicClusterGenerator , standardDivision } from "../Components/cluster-generator"
 
 axios.defaults.headers.common = {
 	'Content-Type': 'application/json'
 };
 
 function Generator() {
-	const width = 30;
-	const height = 30;
+	const width = 100;
+	const height = 100;
 	var newGrid = new Grid({ width, height, rotation: 0 });
 	var money = 1000;
 
@@ -72,14 +72,15 @@ function Generator() {
 		},
 		{
 			width: 1,
-			height: 1,
+			height: 2,
 			cost: 5,
 			color: Colors.COBALT1,
 			wallHugger: true
 		}
 	];
 
-	let rects = basicClusterGenerator();
+    //let rects = basicClusterGenerator();
+    let rects = standardDivision().nonPaths
 	let points = [];
 	rects.forEach((rect) => {
 		for (var i = 0; i < rect.width; i++) {
