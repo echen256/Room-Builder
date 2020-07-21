@@ -5,7 +5,7 @@ import Room from "../Components/Room"
 import Point from "../Geometry/Point";
 import {Triangulation} from "../Geometry/Triangulation"
 import Prims from "../Geometry/Prims";
-import Shuffle from "../Algos/Shuffle" 
+import shuffle from "../Algos/Shuffle" 
 
 export const fill = (x, y, probability, rects) => {
     if (rects.find((r) => {

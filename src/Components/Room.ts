@@ -2,23 +2,24 @@ import Rect from "./rect";
 import Point from "../Geometry/Point";
 
 export default class Room {
-
-    rect : Rect; 
+ 
     entrances : Point[];
     points : Point[];
 
-	constructor(rect : Rect) {
-        this.rect = rect
+	constructor(rect : Rect) { 
         this.entrances = []
         this.points = []
-        for (var i = 0; i < this.rect.width;i++){
-            for (var j = 0; j < this.rect.height;j++){
-                this.points.push(new Point(i + this.rect.x, j + this.rect.y))
+        for (var i = 0; i <  rect.width;i++){
+            for (var j = 0; j <  rect.height;j++){
+                this.points.push(new Point(i +  rect.x, j +  rect.y))
             }
         }
     }
 
-
+    merge (other : Room){
+        this.points= this.points.concat(other.points)
+        this.entrances= this.entrances.concat(other.entrances)
+    }
     
     addEntrance (entrance : Point){
         var index  = this.points.findIndex((p) => {
@@ -33,36 +34,69 @@ export default class Room {
     }
 
     area(){
-        return this.rect.area
+        return this.points.length
+    }
+
+    static IsNeighbor ( room : Room, other : Room){
+        var points1 = room.points;
+        var points2 = other.points;
+        var edges1 : Point[] = []
+        var edges2: Point[] = []
+        var directions = [new Point(1,0), new Point(0,1), new Point(-1,0), new Point(0,-1)]
+        points1.forEach((p) => {
+            directions.forEach((dir) => {
+                edges1.push(new Point(dir.x + p.x, dir.y + p.y))
+            })
+        })
+        points2.forEach((p) => {
+            directions.forEach((dir) => {
+                edges2.push(new Point(dir.x + p.x, dir.y + p.y))
+            })
+        })
+
+        var intersection = edges1.filter((a) => {
+            return edges2.find((b) => {
+                return Point.Equals(a,b)
+            })
+        })
+        return intersection.length > 0
+
+        // if (  
+        //    room.rect.x === other.rect.x + other.rect.width && room.rect.y === other.rect.y)
+        //  {
+        //     return true;
+        // }
+        
+        // if (  
+        //     room.rect.x === other.rect.x  && room.rect.y === other.rect.y + other.rect.height)
+        //   {
+        //      return true;
+        //  }
+        
+         
+        //  if (  
+        //     room.rect.x + room.rect.width === other.rect.x && room.rect.y === other.rect.y)
+        //   {
+        //      return true;
+        //  }
+        
+         
+        //  if (  
+        //     room.rect.x === other.rect.x && room.rect.y + room.rect.height === other.rect.y )
+        //   {
+        //      return true;
+        //  }
+        //  return false;
     }
  
     static GetNeighbors (room : Room, rooms : Room[]){
-        var count = 0;
-        var rect = room.rect;
-        if ( rooms .find((r) => {
-            return r.rect.x === rect.x + rect.width && r.rect.y === rect.y
+        var count = 0; 
+        if (rooms.find((other) => {
+            return Room.IsNeighbor(room,other)
         })) {
             count++;
         }
-        
-        if ( rooms.find((r) => {
-            return r.rect.x === rect.x  && r.rect.y  === rect.y + rect.height
-        })) {
-            count++;
-        }
-    
-    
-        if ( rooms .find((r) => {
-            return r.rect.x + r.rect.width === rect.x  && r.rect.y === rect.y
-        })) {
-            count++;
-        }
-        
-        if ( rooms .find((r) => {
-            return r.rect.y + r.rect.height === rect.y  && r.rect.x === rect.x 
-        })) {
-            count++;
-        }
+       
         return count;
     }
 
@@ -72,13 +106,20 @@ export default class Room {
  
 
 	static Equals(a : Room, b : Room) {
-		return a.rect.Equals(b.rect);
+        var points1 = a.points;
+        var points2 = b.points;
+		var intersection = a.points.filter((p) => {
+            return b.points.find((p2) => {
+                return Point.Equals(p2,p)
+            })
+        })
+        return intersection.length === points1.length && intersection.length === points2.length
 	}
 
 	static Contains(array : Array<Room>, r  : Room) {
 		return (
 			array.find((r2) => {
-				return Rect.Equals(r,r2);
+				return Room.Equals(r,r2)
 			}) 
 		);
 	}

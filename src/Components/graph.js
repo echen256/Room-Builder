@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { Card, Colors, Button } from "@blueprintjs/core"
 import Rect from "./rect"
+import Tile from "./Tile"
 
 export default  class Grid {
     setRotation = (degrees) => {
@@ -27,9 +28,7 @@ export default  class Grid {
         for (var j = 0; j < props.height; j++) {
             for (var i = 0; i < props.width; i++) {
                 this.tiles.push(
-                    {
-                        x: i, y: j, color: Colors.LIGHT_GRAY5
-                    }
+                    new Tile(i,j)
                 )
             }
         } 
