@@ -150,7 +150,7 @@ const mergeRooms = (rooms ) => {
 		})
 
 		for (var i = 0 ; i < neighbors.length;i++){
-			if (Math.random() < .8){
+			if (Math.random() < .6){
 				var index = rooms.findIndex((r3) => {
 					return Room.Equals(r3,neighbors[i])
 				})

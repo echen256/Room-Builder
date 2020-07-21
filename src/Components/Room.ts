@@ -6,6 +6,8 @@ export default class Room {
     entrances : Point[];
     points : Point[];
 
+    static  directions : Point[] = [new Point(1,0), new Point(0,1), new Point(-1,0), new Point(0,-1)]
+
 	constructor(rect : Rect) { 
         this.entrances = []
         this.points = []
@@ -37,19 +39,27 @@ export default class Room {
         return this.points.length
     }
 
+    getEdgePoints () {
+        var edgePoints = this.points.filter((point) => {
+            var neighbors = Point.Neighbors(this.points, point);
+            return neighbors.length < 4
+        })
+        return edgePoints
+    }
+
     static IsNeighbor ( room : Room, other : Room){
         var points1 = room.points;
         var points2 = other.points;
         var edges1 : Point[] = []
         var edges2: Point[] = []
-        var directions = [new Point(1,0), new Point(0,1), new Point(-1,0), new Point(0,-1)]
+        
         points1.forEach((p) => {
-            directions.forEach((dir) => {
+            Room.directions.forEach((dir) => {
                 edges1.push(new Point(dir.x + p.x, dir.y + p.y))
             })
         })
         points2.forEach((p) => {
-            directions.forEach((dir) => {
+            Room.directions.forEach((dir) => {
                 edges2.push(new Point(dir.x + p.x, dir.y + p.y))
             })
         })
@@ -104,7 +114,6 @@ export default class Room {
 		return a.area() > b.area() ? 1 : a.area() === b.area() ? 0 : -1;
 	}
  
-
 	static Equals(a : Room, b : Room) {
         var points1 = a.points;
         var points2 = b.points;

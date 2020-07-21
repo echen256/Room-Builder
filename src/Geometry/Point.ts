@@ -1,7 +1,9 @@
+
 export default class Point {
 
 	x : number;
 	y : number;
+	static  directions : Point[] = [new Point(1,0), new Point(0,1), new Point(-1,0), new Point(0,-1)]
 
 	constructor(x : number, y : number) {
 		this.x = x;
@@ -30,5 +32,16 @@ export default class Point {
 				return Point.Equals(p, point);
 			}) !== undefined
 		);
+	}
+
+	static Neighbors(array : Array<Point>, point : Point) {
+		var neighbors : Point[]= [];
+		Point.directions.forEach((dir) => {
+			var p2 = new Point(dir.x + point.x, dir.y + point.y);
+			if (Point.Contains(array,p2)){
+				neighbors.push(p2);
+			}
+		})
+		return neighbors;
 	}
 }
