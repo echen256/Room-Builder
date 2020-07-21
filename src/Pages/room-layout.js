@@ -5,8 +5,8 @@ import GridRenderer from './../Components/graph_renderer';
 import axios from 'axios';
 import './../layouts/index';
 import Rect from '../Components/rect';
-import {generateLayout} from "../Components/room-layout-generator"
-import {basicClusterGenerator , standardDivision } from "../Components/cluster-generator"
+import { generateLayout } from '../Components/room-layout-generator';
+import { basicClusterGenerator, standardDivision } from '../Components/cluster-generator';
 
 axios.defaults.headers.common = {
 	'Content-Type': 'application/json'
@@ -17,8 +17,6 @@ function Generator() {
 	const height = 100;
 	var newGrid = new Grid({ width, height, rotation: 0 });
 	var money = 1000;
-
-	
 
 	let props = [
 		{
@@ -79,8 +77,28 @@ function Generator() {
 		}
 	];
 
-    //let rects = basicClusterGenerator();
-    let rects = standardDivision().nonPaths
+	let output = standardDivision();
+	let rects = output.nonPaths;
+	let pathRects = output.paths;
+
+	pathRects.forEach((rect) => {
+		for (var i = 0; i < rect.width; i++) {
+			for (var j = 0; j < rect.height; j++) {
+				newGrid.getTile(i + rect.x, j + rect.y).color = Colors.BLACK;
+			}
+		}
+	});
+
+	output.centers.forEach((rect) => {
+		for (var i = 0; i < rect.width; i++) {
+			for (var j = 0; j < rect.height; j++) {
+				newGrid.getTile(i + rect.x, j + rect.y).color = Colors.WHITE;
+			}
+		}
+	});
+
+	
+
 	let points = [];
 	rects.forEach((rect) => {
 		for (var i = 0; i < rect.width; i++) {
@@ -91,8 +109,15 @@ function Generator() {
 		}
 	});
 
-    generateLayout(points, props, money,newGrid)
-    
+	// output.entrances.forEach((rect) => {
+	// 	for (var i = 0; i < rect.width; i++) {
+	// 		for (var j = 0; j < rect.height; j++) {
+	// 			newGrid.getTile(i + rect.x, j + rect.y).color = Colors.RED1;
+	// 		}
+	// 	}
+	// });
+
+	generateLayout(points, props, money, newGrid);
 
 	return (
 		<div style={{ margin: 'auto', marginTop: '100px', width: 'fit-content' }}>
@@ -103,7 +128,5 @@ function Generator() {
 		</div>
 	);
 }
-
-
 
 export default Generator;

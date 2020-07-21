@@ -1,14 +1,33 @@
 export default class Rect {
 
+    width : number;
+    height : number
+    x : number
+    y : number
 
-    constructor (width, height, x, y ){
+    constructor (width : number, height: number, x: number, y: number ){
         this.width = width;
         this.height = height;
         this.x = x;
         this.y = y; 
+        
     }
 
-    getRotatedRect (rotation) {
+  
+    
+    static Equals(a : Rect, b: Rect){
+        return a.x === b.x && a.y === b.y && a.width === b.width && a.height === b.height
+    }
+
+    Equals (other : Rect){
+        return Rect.Equals(this,other)
+    }
+
+    area (){
+        return this.x * this.y
+    }
+
+    getRotatedRect (rotation: number) {
           
         var rotatedWidth = Math.round(this.width * Math.cos( rotation) - this.height * Math.sin( rotation));
         var rotatedHeight = Math.round(this.width * Math.sin( rotation) + this.height * Math.cos(rotation));
@@ -19,7 +38,7 @@ export default class Rect {
          return new Rect(Math.abs(rotatedWidth),Math.abs(rotatedHeight),rotatedX, rotatedY);
     }
 
-    contains (otherRect){
+    contains (otherRect : Rect){
         var minBx = otherRect.x;
         var minAx = this.x;
         var maxAx = this.x + this.width;
@@ -34,7 +53,7 @@ export default class Rect {
         return minBy >= minAy && minBx >= minAx && maxBy <= maxAy && maxBx <= maxAx
     }
 
-    overlaps (otherRect) {
+    overlaps (otherRect : Rect) {
         var minBx = otherRect.x;
         var minAx = this.x;
         var maxAx = this.x + this.width;
