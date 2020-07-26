@@ -176,14 +176,16 @@ export const standardDivision = (newGrid) => {
      
     for (var i = 0; i < output.nonPaths.length; i++) {
         var r = output.nonPaths[i];
-        var adjustedHeight =  2 + Math.floor(Math.random() *4);
-        var adjustedWidth =  2 +Math.floor(Math.random() * 4);
+        var adjustedHeight =  4 + Math.floor(Math.random() *4);
+        var adjustedWidth =  4 +Math.floor(Math.random() * 4);
         processSingleRect(r, output.allRects, adjustedWidth, adjustedHeight)
     }
 
     for (var i = 0; i < output.centers.length; i++) {
         var r = output.centers[i];
-        processSingleRect(r, output.allRects, Math.round(Math.random() )  + 1, Math.round(Math.random() )  + 1)
+        var adjustedHeight =Math.round(Math.random()   )  + 3
+        var adjustedWidth = Math.round(Math.random() )  + 3
+        processSingleRect(r, output.allRects, adjustedWidth,adjustedHeight)
     }
 
     return output;

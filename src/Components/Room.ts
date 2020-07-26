@@ -32,7 +32,6 @@ export default class Room {
         }
         
         this.entrances.push(entrance);
-        this.points.splice(index,1)
     }
 
     area(){
@@ -43,6 +42,14 @@ export default class Room {
         var edgePoints = this.points.filter((point) => {
             var neighbors = Point.Neighbors(this.points, point);
             return neighbors.length < 4
+        })
+        return edgePoints
+    }
+
+    getInnerPoints () {
+        var edgePoints = this.points.filter((point) => {
+            var neighbors = Point.Neighbors(this.points, point);
+            return neighbors.length === 4
         })
         return edgePoints
     }
@@ -99,15 +106,17 @@ export default class Room {
         //  return false;
     }
  
+
+    static IndexOf (room : Room, rooms : Room[]){
+        return rooms.findIndex((r) => {
+            return Room.Equals(r,room)
+        })
+    }
+
     static GetNeighbors (room : Room, rooms : Room[]){
-        var count = 0; 
-        if (rooms.find((other) => {
-            return Room.IsNeighbor(room,other)
-        })) {
-            count++;
-        }
-       
-        return count;
+        return rooms.filter((r2) => {
+            return Room.IsNeighbor(room, r2)
+        })
     }
 
 	static compare(a : Rect, b : Rect) {

@@ -1,28 +1,25 @@
-import React, { useState } from 'react';
-import { Card, Colors, Button, InputGroup, Divider, H1, Popover, H3, NonIdealState } from '@blueprintjs/core';
-import Grid from './../Components/graph';
-import GridRenderer from './../Components/graph_renderer';
+import { Colors } from '@blueprintjs/core';
 import axios from 'axios';
-import './../layouts/index';
-import Rect from '../Components/rect';
-
+import React from 'react';
+import shuffle from '../Algos/Shuffle';
+import { standardDivision } from '../Components/cluster-generator';
 import Room from '../Components/Room';
 import { generateLayout } from '../Components/room-layout-generator';
-import { basicClusterGenerator, standardDivision } from '../Components/cluster-generator';
 import Point from '../Geometry/Point';
-import Tile from "../Components/Tile"
-import shuffle from '../Algos/Shuffle';
+import Grid from './../Components/graph';
+import GridRenderer from './../Components/graph_renderer';
+import './../layouts/index';
+
 
 axios.defaults.headers.common = {
 	'Content-Type': 'application/json'
 };
 
 function Generator() {
-	const width = 100;
-	const height = 100;
-	var newGrid = new Grid({ width, height, rotation: 0 });
-	var money = 1000;
-
+	const width = 150;
+	const height = 150;
+	let newGrid = new Grid({ width, height, rotation: 0 });
+	let money = 1000;
 	let props = [
 		{
 			width: 3,
@@ -84,33 +81,15 @@ function Generator() {
 
 	let output = standardDivision();
 	let rects = output.nonPaths;
-	let pathRects = output.paths;
-
-	pathRects.forEach((rect) => {
-		for (var i = 0; i < rect.width; i++) {
-			for (var j = 0; j < rect.height; j++) {
-				newGrid.getTile(i + rect.x, j + rect.y).color = Colors.BLACK;
-			}
-		}
-	});
-
-	output.centers.forEach((rect) => {
-		for (var i = 0; i < rect.width; i++) {
-			for (var j = 0; j < rect.height; j++) {
-				newGrid.getTile(i + rect.x, j + rect.y).color = Colors.WHITE;
-			}
-		}
-	});
-
-	let rooms = []
-	let points = [];
+	let rooms = [] 
 	rects.forEach((rect) => { 
-		var r = new Room(rect)
+		let r = new Room(rect)
 		rooms.push(r)
 	});
 
 	chooseEntrances(rooms, output, newGrid)
 	rooms = mergeRoomsWithNoEntrances(rooms )
+	drawPaths(output, newGrid)
 	drawRooms(rooms, output, newGrid, props, money)
 	 
 
@@ -125,7 +104,7 @@ function Generator() {
 }
 
 const mergeRoomsWithNoEntrances = (rooms) => {
-	var numberOfRoomsWithNoEntrances = rooms.filter((r) => {
+	let numberOfRoomsWithNoEntrances = rooms.filter((r) => {
 		return r.entrances.length === 0
 	})
 	while (numberOfRoomsWithNoEntrances.length > 0){
@@ -141,47 +120,83 @@ const mergeRooms = (rooms ) => {
 	rooms = rooms.sort((a,b) => {
 		return a.entrances - b.entrances
 	})
-	var newRooms = []
+	let newRooms = []
 	rooms = [...rooms]
 	while (rooms.length > 0){
-		var r = rooms.pop();
-		var neighbors = rooms.filter((r2) => {
-			return Room.IsNeighbor(r,r2)
-		})
+		let r = rooms.pop();
 
-		for (var i = 0 ; i < neighbors.length;i++){
-			if (Math.random() < .6){
-				var index = rooms.findIndex((r3) => {
-					return Room.Equals(r3,neighbors[i])
-				})
-				rooms.splice(index,1)
-				let l1 = r.points.length
-				r.merge (neighbors[i])
-				let l2 = r.points.length
-				console.log(l2 > l1)
+		let neighbors = Room.GetNeighbors(r, rooms)
+		
+		let area = 1000;
+		let selectedRoom = undefined;
+		neighbors.forEach((neighbor) => {
+			if ( neighbor.area() < area){
+				selectedRoom = neighbor
+				area = neighbor.area()
 			}
+		})
+ 
+		if (selectedRoom !== undefined){
+			let index =  Room.IndexOf(selectedRoom, rooms)
+			r.merge (selectedRoom)
+			rooms.splice(index,1)
 			
-
 		}
 		newRooms.push(r)
+		
 	}
 	return newRooms
 }
 
+const drawPaths = (output, newGrid) => {
+	let pathRects = output.paths;
+
+	pathRects.forEach((rect) => {
+		for (let i = 0; i < rect.width; i++) {
+			for (let j = 0; j < rect.height; j++) {
+				
+				newGrid.getTile(i + rect.x, j + rect.y).color = Colors.BLACK;
+			}
+		}
+	});
+
+	output.centers.forEach((rect) => {
+		for (let i = 0; i < rect.width; i++) {
+			for (let j = 0; j < rect.height; j++) {
+				newGrid.getTile(i + rect.x, j + rect.y).color = Colors.WHITE;
+			}
+		}
+	});
+}
+
 const drawRooms =  (rooms, output, newGrid, props, money) => {
-	rooms.forEach((r) => { 
-		var points = r.points;
-		points.forEach((p ) => {
-			var tile = newGrid.getTile(p.x,   p.y)
+	rooms.forEach((r) => {  
+		let innerPoints = r.getInnerPoints();
+		r.getEdgePoints().forEach((p ) => {
+			let tile = newGrid.getTile(p.x,   p.y)
 			tile.styleBorder(r)
 			tile.color = Colors.GRAY1;
 		})
-		var entrances = r.entrances;
+
+		innerPoints.forEach((p ) => {
+			let tile = newGrid.getTile(p.x,   p.y)
+			tile.styleBorder(r)
+			tile.color = Colors.LIGHT_GRAY1;
+		})
+
+		
+
+		let entrances = r.entrances;
 		entrances .forEach((p ) => {
 			newGrid.getTile(p.x,   p.y).color = Colors.INDIGO1;
 		})
 
-		generateLayout(r.points, props, money, newGrid);
+
+		innerPoints = innerPoints.filter((p) => {
+			return Point.Neighbors(entrances,p).length === 0
+		})
+
+		generateLayout(innerPoints, props, money, newGrid);
 	})
 
 }
@@ -189,20 +204,20 @@ const drawRooms =  (rooms, output, newGrid, props, money) => {
 const chooseEntrances = (rooms, output, newGrid) => {
 	rooms.forEach((r) => {
  
-		var neighboringPaths = output.paths.filter((other) => {
+		let neighboringPaths = output.paths.filter((other) => {
 			return Room.IsNeighbor(new Room(other),r )
 		}) 
-		var neighboringPoints = []
+		let neighboringPoints = []
 		neighboringPaths.forEach((rect) => {
 			neighboringPoints = neighboringPoints.concat(new Room(rect).points)
 		}) 
-		var borderPoints = r.points.filter((p) => {
-			var count = 0;
-			for (var i = -1; i < 2;i++){
-				for (var j = -1; j < 2;j++){
-					var sum = Math.abs(i) + Math.abs(j)
+		let borderPoints = r.points.filter((p) => {
+			let count = 0;
+			for (let i = -1; i < 2;i++){
+				for (let j = -1; j < 2;j++){
+					let sum = Math.abs(i) + Math.abs(j)
 					if (sum === 1){
-						var p2 = new Point(i + p.x, j + p.y)
+						let p2 = new Point(i + p.x, j + p.y)
 						if (neighboringPoints.find((p3) => {
 							return Point.Equals(p2,p3)
 						})){
@@ -213,35 +228,21 @@ const chooseEntrances = (rooms, output, newGrid) => {
 			}
 			return count > 0
 		})
+
+		borderPoints = borderPoints.filter((p) => {
+			let neighbors = Point.Neighbors(r.points,p)
+			return neighbors.length === 3
+		})
 	
 		// borderPoints.forEach((p) => {
 		// 	newGrid.getTile( p.x, p.y).color = Colors.GRAY5;
 		// })
 
 		borderPoints = shuffle(borderPoints)
-		for (var i = 0; i < Math.min(1, borderPoints.length); i++){
+		for (let i = 0; i < Math.min(1, borderPoints.length); i++){
 			r.addEntrance(borderPoints[i])
 		}
 	})
 }
-
-// const chooseEntrances = (rooms, percentage) => {
-//     var numberOfEntrances = Math.max(1, Math.round(rooms.length * percentage))
-//     var pieces = [...rooms]
-//     var roomsContainingEntrances = []
-//     var count = 0;
-//     while (count < numberOfEntrances){
-//         if (pieces.length === 0) break;
-//         var room = pieces.pop();
-   
-//         if (neighborCount(room, rooms) < 4){
-//             roomsContainingEntrances.push(room)
-//             count++;
-//         }
-        
-//     }
-//     return roomsContainingEntrances
-// }
-
 
 export default Generator;

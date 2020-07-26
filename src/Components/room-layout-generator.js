@@ -1,25 +1,10 @@
+import Point from "../Geometry/Point";
+
 export const generateLayout = (points, props, money,newGrid) => {
     const checkIfPointExists = (nextPoint, points) => {
 		return points.find((p) => {
 			return nextPoint.x === p.x && nextPoint.y === p.y;
 		});
-	};
-
-	const numberOfNeighbors = (point, points) => {
-		var count = 0;
-		for (var i = -1; i < 2; i++) {
-			for (var j = -1; j < 2; j++) {
-				var sum = Math.abs(i) + Math.abs(j);
-				if (sum === 1) {
-					var nextPoint = { x: point.x + i, y: point.y + j };
-					var contains = checkIfPointExists(nextPoint, points);
-					if (contains != undefined) {
-						count++;
-					}
-				}
-			}
-		}
-		return count;
 	};
 
 	const arrayFill = (point, points, prop, direction, originalPoints) => {
@@ -60,10 +45,10 @@ export const generateLayout = (points, props, money,newGrid) => {
 		for (var i = 0; i < prop.width; i++) {
 			for (var j = 0; j < prop.height; j++) {
 				var p2 = { x: point.x + i, y: point.y + j };
-
-				if (4 === numberOfNeighbors(p2, points)) {
-					return false;
+				if (Point.Neighbors( points, p2).length === 4){
+					return false
 				}
+			 
 			}
 		}
 		return true;
@@ -74,9 +59,10 @@ export const generateLayout = (points, props, money,newGrid) => {
 			for (var j = 0; j < prop.height; j++) {
 				var p2 = { x: point.x + i, y: point.y + j };
 
-				if (!checkIfPointExists(p2, points)) {
-					return false;
+				if (! Point.Contains(points,p2)){
+					return false 
 				}
+			 
 			}
 		}
 		var wallHuggerCondition = true;
@@ -121,7 +107,7 @@ export const generateLayout = (points, props, money,newGrid) => {
 
 	while (loopPoints.length > 0) {
         loopPoints = loopPoints.sort((a,b) => {
-            return numberOfNeighbors(a,loopPoints) > numberOfNeighbors(b, loopPoints)
+            return Point.Neighbors( loopPoints,a).length > Point.Neighbors( loopPoints,b).length
         })
         var index = 0;
        // var index = Math.floor(Math.random() * loopPoints.length)
